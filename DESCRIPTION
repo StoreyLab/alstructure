@@ -1,0 +1,20 @@
+Package: alstructure
+Type: Package
+Title: Efficient nonparametric algorithm for fitting the admixture model.
+Version: 0.1.0
+Author: Irineo Cabreros, John D. Storey
+Date: 2018-01-31
+Maintainer: Irineo Cabreros <cabreros@math.princeton.edu>, John D. Storey <jstorey@princeton.edu> 
+Description: An alternating least squares method for estimating global ancestry under the admixture model.
+License: MIT + file LICENSE
+LazyData: TRUE
+Imports:
+    lfa
+Suggests:
+    testthat,
+    knitr,
+    rmarkdown,
+    slam,
+    gurobi
+RoxygenNote: 6.0.1
+VignetteBuilder: knitr

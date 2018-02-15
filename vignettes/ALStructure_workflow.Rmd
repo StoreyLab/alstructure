@@ -1,0 +1,271 @@
+---
+title: "ALStructure Workflow"
+author: "Irineo Cabreros"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    fig_caption: yes
+bibliography: refs.bib
+vignette: >
+  %\VignetteIndexEntry{ALStructure Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The `alstructure` package contains functions for fitting the admixture model given a SNP matrix using the efficient `ALStructure` algorithm described from [@cabreros_storey_2017]. The model assumes that the $x_{ij}$ entry of the $m \times n$ SNP data matrix is drawn from a binomial distribution with parameter $f_{ij}$
+
+$$
+x_{ij} \sim \text{Binomial}(2, f_{ij})
+$$
+
+The matrix $\boldsymbol{F}$, also an $m \times n$ matrix, is of low rank. That is, $\boldsymbol{F}$ admits the factorization
+
+$$
+\boldsymbol{F} = \boldsymbol{P}\boldsymbol{Q}
+$$
+
+where $\boldsymbol{P}$ is an $m \times d$ matrix and $\boldsymbol{Q}$ is a $d \times n$ matrix. The `alstructure` algorithm is appropriate in the typical setting in which $m \gg n \gg d$.
+
+The outputs of the `ALStructure` algorithm are the estimates $\boldsymbol{\hat{P}}$, and $\boldsymbol{\hat{Q}}$.
+
+## Simulating Data
+
+The function `simulate_admixture` generates a data from the PSD model. The function returns a list with global ancestry parameters $\boldsymbol{P}$ and $\boldsymbol{Q}$ as well as a single draw $\boldsymbol{X}$ from the model.
+
+```{r, sim_data, cache = TRUE}
+library(alstructure)
+m = 10000 # number of SNPS
+n = 100 # number of individuals
+d = 3 # dimension of latent subspace
+alpha = c(0.1, 0.1, 0.1) # dirichlet parameters
+seed = 12345
+
+sim_data <- simulate_admixture(m, n, d, alpha, BN_params = NA, seed = seed)
+
+names(sim_data)
+```
+
+## Fitting the admixture model
+
+Given a SNP matrix, the `alstructure()` function fits the admixture model using the `ALStructure` algorithn. The only required input is the SNP matrix $\boldsymbol{X}$. The user can supply an estimate of the latent subspace dimension $d$ by setting the parameter `d_hat`, or, if `d_hat` is not supplied, an estimate is automatically provided by the function `estimate_d()`.
+
+```{r alstructure, dependson = "sim_data", cache = TRUE}
+fit <- alstructure(X = sim_data$X, d_hat = d)
+
+names(fit)
+```
+
+Now we see how the `alstructure` output compares to the ground truth. However, because any permutation of the rows and columns of $\boldsymbol{P}$ and $\boldsymbol{Q}$ results in the same $\boldsymbol{F}$ individual-specific allele frequency matrix, the admixture model is inherently nonidentifiable. In order to make meaningful comparisons, we disambiguate the order of the rows of $\boldsymbol{Q}$ matrix by applying the `order_Q()` function. 
+
+The `order_Q` function has two methods: "ave_admixture" (default) and "var_explained." "ave_admixture" method orders the rows of $\boldsymbol{Q}$ according to the average admixture proportion accross all samples. The "var_explained" method orders the rows of $\boldsymbol{Q}$ by decreasing $ \text{eigen}-R^2$, a statistic introduced by [@eigenr2].
+
+```{r order_Q, dependson = c("sim_data", "alstructure"), cache = TRUE}
+ordered_factors_true <- order_pops(sim_data$P, sim_data$Q, method = "ave_admixture")
+ordered_factors_est <- order_pops(fit$P, fit$Q_hat, method = "ave_admixture")
+Q_true <- ordered_factors_true$Q_ordered
+Q_est <- ordered_factors_est$Q_ordered
+
+Q_true[1:3, 1:3]
+Q_est[1:3, 1:3]
+```
+
+Now, we compare the output of `alstructure()` with the ground truth by producing bi-plots. We highlight a random subset of points as an aid to the eye. We see that the match between the two plots is nearly identical.
+
+```{r plot_comparison, fig.width = 5, dpi = 150, dependson = "order_Q"}
+library(ggplot2)
+library(gridExtra)
+theme_set(theme_bw())
+
+# held out indices to highlight individual points
+n <- dim(Q_true)[2]
+highlight <- rep(0, n)
+highlight[sample(1:n, 5)] <- 1 
+highlight <- as.factor(highlight)
+
+# make dataframe for each 
+df_true <- data.frame(Q1 = Q_true[1,], Q2 = Q_true[2, ], highlight = highlight)
+df_est <- data.frame(Q1 = Q_est[1,], Q2 = Q_est[2, ], highlight = highlight)
+
+p_true <- ggplot(dplyr::filter(df_true, highlight == 0)) + 
+          geom_point(mapping = aes(x = Q1, y = Q2), color = "slateblue") +
+          geom_point(dplyr::filter(df_true, highlight == 1), mapping = aes(x = Q1, y = Q2), color = "tomato") +
+          scale_colour_manual(values = c("slateblue", "tomato"))+ 
+          ggtitle("Q1 vs Q2 ground truth") + 
+          coord_fixed()
+
+p_est <- ggplot(dplyr::filter(df_est, highlight == 0)) + 
+          geom_point(mapping = aes(x = Q1, y = Q2), color = "slateblue") +
+          geom_point(dplyr::filter(df_est, highlight == 1), mapping = aes(x = Q1, y = Q2), color = "tomato") +
+          scale_colour_manual(values = c("slateblue", "tomato"))+ 
+          ggtitle("Q1 vs Q2 estimate") + 
+          coord_fixed()
+
+p <- grid.arrange(p_true, p_est, ncol = 2)
+
+p
+```
+
+
+
+### Components of the `alstructure` algorithm
+
+The `ALStructure` algorithm comprises of three basic steps:
+
+  1. `lse()`: Estimating the latent subspace $\langle \boldsymbol{Q} \rangle$
+  1. `estimate_F()`: Estimating the $\boldsymbol{F}$ matrix from $\widehat{\langle  \boldsymbol{Q} \rangle}$ 
+  1. `factor_F`: Factoring $\boldsymbol{\hat{F}}$ to obtain $\boldsymbol{\hat{P}}$ and $\boldsymbol{\hat{Q}}$.
+  
+All three of these steps are performed in `alstructure()` function, however each of these steps can be separately executed by the `lse()`, `estimate_F`, and `factor_F()` functions, respectively. 
+
+#### Estimating $\langle \boldsymbol{Q} \rangle$
+
+To estimate the latent subspace $\langle \boldsymbol{Q} \rangle$, the `ALStructure` algorithm uses the method of Latent Subspace Estimation from [@chen_lse]. This method is implemented in the `lse()` function. `lse()` returns a set of orthogonal eigenvectors, ordered by their corresponding eigenvalues, whose span approximates the same space as $\langle \boldsymbol{Q} \rangle$. The vectors are eigenvectors of the matrix
+
+$$
+\boldsymbol{G} = \frac{1}{m}\boldsymbol{X}^T\boldsymbol{X} - \boldsymbol{D}
+$$
+
+where the matrix $\boldsymbol{D}$ is a diagonal matrix with each diagonal entry $d_{ii}$ an estimate of the average of the variances of the random variables in the $i$ column of $\boldsymbol{X}$.
+
+
+```{r lse, dependson = "sim_data"}
+latent_subspace <- lse(sim_data$X, d)
+```
+
+#### Estimating $\boldsymbol{F}$
+
+To obtain an estimate $\boldsymbol{\hat{F}}$, we use the function `F_estimate`. 
+
+```{r, dependson = "sim_data"}
+F_hat <- estimate_F(X = sim_data$X, d = 3)$F_hat
+```
+
+#### Factoring $\boldsymbol{\hat{F}}$
+
+Now that we have obtained an estimate $\boldsymbol{\hat{F}}$, we can use the `factor_F` function to factor it. This function uses the `uALS` algorithm from [@cabreros_storey_2017]. 
+
+```{r}
+  factors <- factor_F(F_hat = F_hat, d = 3)
+```
+
+The `cALS` algorithm from [@cabreros_storey_2017], as it requires solving many quadratic programming problems, it is much slower. At the end of this vignette, we attach an implementation of the `cALS` algorithm that uses Gurobi, 
+a commercial optimization solver.
+
+#### Estimating $d$
+Many of the estimation functions above require the dimension of the latent subspace, $d$, as an input. The function `estimate_d()` uses a method from [@leek_d] to estimate $d$.
+
+```{r, dependson = "sim_data"}
+d_hat <- estimate_d(X = sim_data$X)
+d_hat
+```
+
+We note that in this example, $\hat{d}$ was incorrectly estimated. However, estimating $\hat{d}$ is a notoriously difficult problem, and the method implemented here is only guaranteed _asymptotically_ to be accurate in $m$. 
+
+## `.bed` files
+
+Many large SNP datasets are stored in PLINK format as `.bed` files. While the `alstructure()` function requires a numeric dataset, `.bed` files can be converted to numeric matrices using the `read.bed` function from the `lfa` package. The `read.bed()` function requires a path to `.bed`, `.bim`, and `.fam` files. In the example below, three files `example.bed`, `example.bim`, and `example.fam` are located in the `extdata/` folder of the `alstructure` package. The data encoded in the included `.bed` files is the same as the simulated data in the previous example.
+
+```{r bed_example, cache = TRUE, eval = FALSE}
+path <- system.file("extdata/", "", package = "alstructure") 
+path <- paste0(path, "/example")
+
+data_from_bed <- lfa::read.bed(path)
+class(data_from_bed)
+
+# fit with ALStructure algorithm
+fit <- alstructure(X = data_from_bed, d_hat = 3)
+```
+
+## Using the `cALS` algorithm
+
+In [@cabreros_storey_2017], we propose the `cALS` algorithm for factoring $\boldsymbol{F}$ which has the appealing theoretical guarantee of converging to a stationary point. This algorithm, however, is much slower than the `uALS` algorithm that is implemented in `factor_F`. Below is an implementation of the `cALS` algorithm that uses the commercial software `gurobi`. Detailed instructions for installation of Gurobi can be found here:
+[https://cran.r-project.org/web/packages/prioritizr/vignettes/gurobi_installation.htmlk](https://cran.r-project.org/web/packages/prioritizr/vignettes/gurobi_installation.html).
+
+```{r cals, eval = FALSE}
+# A provable algorithm for factoring \eqn{\boldsymbol{\hat{F}}}{F_hat}.
+cals <- function(F_hat, d, tol = 0.00001, max_iters = 1000,
+                            P_init = NULL, Q_init = NULL, P_samples = NULL, Q_samples = NULL){
+  F <- F_hat
+  if (is.null(P_init)){
+    P_init = matrix(runif(dim(F)[1] * d), nrow = dim(F)[1], ncol = d)
+  }
+
+  if (is.null(Q_init)){
+    Q_init = matrix(0, nrow = d, ncol = dim(F)[2])
+  }
+
+  if (is.null(Q_samples)){
+    Q_samples = dim(F)[2]
+  }
+
+  if (is.null(P_samples)){
+    P_samples = dim(F)[1]
+  }
+
+  P = P_init; Q = Q_init
+
+  m <- dim(F)[1]
+  n <- dim(F)[2]
+
+  params = list(OutputFlag = 0)
+
+  model_square <- list()
+  model_square$lb <- rep(0, d)
+  model_square$ub <- rep(1, d)
+  model_square$A <- matrix(0, nrow = 1, ncol = d) # fake linear constraint
+  model_square$rhs <- 0
+  model_square$sense <- '='
+
+  model_triangle <- list()
+  model_triangle$A <- matrix(1, nrow = 1, ncol = d)
+  model_triangle$sense <- '='
+  model_triangle$rhs <- 1
+  model_triangle$lb <- rep(0, d)
+  model_triangle$ub <- rep(1, d)
+
+  obj_vals <- matrix(0, nrow = 2, ncol = max_iters)
+
+  iter <- 1
+  current_RMSE <- Inf
+  Q_old <- Inf*matrix(1, nrow = d, ncol = n)
+  while ((iter < max_iters) && (current_RMSE > tol)){
+    # randomly sample rows of the P matrix and columns of the Q matrix for
+    # efficient fitting
+    P_samps <- sample(1:m, P_samples, replace = FALSE)
+    Q_samps <- sample(1:n, Q_samples, replace = FALSE)
+    model_triangle$Q <- t(P) %*% P
+    for (j in Q_samps){
+      model_triangle$obj <- -2 * t(P) %*% F[, j]
+      result <- gurobi::gurobi(model_triangle, params)
+      Q[, j] <- result$x
+    }
+    obj_vals[1,iter] <- result$objval
+
+    model_square$Q <- Q %*% t(Q)
+    for (j in P_samps){
+      model_square$obj <- -2 * t(F[j, ] %*% t(Q))
+      result <- gurobi::gurobi(model_square, params)
+      P[j, ] <- result$x
+    }
+    obj_vals[2, iter] <- result$objval
+    iter <- iter + 1
+    current_RMSE <- RMSE(Q, Q_old)
+    Q_old <- Q
+  }
+
+  final_result = list(P_hat = P, Q_hat = Q, obj_vals = obj_vals)
+  return(final_result)
+}
+```
+
+Below is an example in which we use `cals()` on a small dataset.
+
+```{r, eval = FALSE}
+library(gurobi)
+
+sim_data <- simulate_admixture(m = 100, n = 20, d = 3, alpha = c(0.1, 0.1, 0.1), seed = 1234)
+
+F_hat <- F_estimate(X = sim_data$X, d = 3)
+
+factors_provable <- cALS(F = F_hat, d = 3, tol = 0.0001, max_iters = 50, Q_match = sim_data$Q)
+```
