@@ -16,5 +16,5 @@ To get started, read the vignette:
 
 ```
 library("alstructure")
-browseVignettes(package="alstructure")
+vignette("ALStructure_workflow", package="alstructure")
 ```
