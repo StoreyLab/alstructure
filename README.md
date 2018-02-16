@@ -3,7 +3,7 @@ An R package that implements the ALStructure algorithm for estimating the admixt
 
 The corresponding manuscript:
 
-https://www.biorxiv.org/content/early/2017/12/29/240812
+Irineo Cabreros and John D. Storey. A nonparametric estimator of population structure unifying admixture models and principal components analysis. *bioRxiv*, https://www.biorxiv.org/content/early/2017/12/29/240812.
 
 To install in R do:
 
