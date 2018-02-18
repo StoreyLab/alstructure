@@ -1,15 +1,5 @@
 # tests for comparison functions
 
-test_that("the make_bed() function is working properly",{
-  m <- 101; n <- 24; d <- 3; alpha <- c(0.1, 0.1, 0.1); seed <- 1234
-
-  data <- simulate_admixture(m, n, d, alpha, seed = seed)
-
-  out_file <- "/Users/irineocabreros/Desktop/Research/Storey/cabreros/F=PQ/simulations/sample_beds/Y_sample"
-
-  make_bed(data$X, out_file, B = 1)
-})
-
 test_that("the order_Q() frunction is working properly with var_explained method", {
   m <- 1000; n <- 100; d <- 10; real_inds <- c(1, 6, 8); alpha <- rep(0.1, d)
 
