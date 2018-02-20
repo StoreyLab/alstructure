@@ -9,7 +9,7 @@ Description: An alternating least squares method for estimating global ancestry 
 License: MIT + file LICENSE
 LazyData: TRUE
 Imports:
-    lfa
+    svd
 Suggests:
     testthat,
     knitr,

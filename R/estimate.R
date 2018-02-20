@@ -42,8 +42,7 @@ D_binomial <- function(X){
 #' @param d The rank of \eqn{\boldsymbol{F}}{F}. This can be estimated using the function
 #'        \code{d_estimate()}.
 #' @param svd_method One of "base" or "truncated_svd." If "base" is chosen, the
-#' base \code{svd()} function is used. If "truncated_svd" is used, the truncated svd algorithm
-#' from the \code{lfa} package is used.
+#' base \code{svd()} function is used. If "truncated_svd" is chosen, the truncated svd algorithm \code{propack.svd()} from the \code{svd} package is used.
 #'
 #' @return A list with the following elements:
 #'    \describe{
@@ -120,8 +119,7 @@ estimate_d <- function(X){
 #'  function \code{d_estimate()}. When \eqn{d = n}{d = n}, all eigenvectors
 #'  of \eqn{\boldsymbol{G}}{G} are returned.
 #' @param svd_method One of "base" or "truncated_svd." If "base" is chosen, the
-#' base \code{svd()} function is used. If "truncated_svd" is used, the truncated svd algorithm
-#' from the \code{lfa} package is used.
+#' base \code{svd()} function is used. If "truncated_svd" is chosen, the truncated svd algorithm \code{propack.svd()} from the \code{svd} package is used.
 #'
 #' @return A list with the following elements:
 #'    \describe{
@@ -148,7 +146,7 @@ lse <- function(X, d, svd_method = "base"){
     values <- rowspace$values[1:d]
   } else if(svd_method == "truncated_svd"){
     # find the rowspace using truc.svd
-    rowspace <- lfa:::trunc.svd(1 / m * t(X) %*% X - D, d = d)
+    rowspace <- svd::propack.svd(1 / m * t(X) %*% X - D, neig = d)
     vectors <- rowspace$v[, 1:d]
     values <- rowspace$d[1:d]
   }

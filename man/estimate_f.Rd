@@ -13,8 +13,7 @@ estimate_F(X, d, svd_method = "base")
 \code{d_estimate()}.}
 
 \item{svd_method}{One of "base" or "truncated_svd." If "base" is chosen, the
-base \code{svd()} function is used. If "truncated_svd" is used, the truncated svd algorithm
-from the \code{lfa} package is used.}
+base \code{svd()} function is used. If "truncated_svd" is chosen, the truncated svd algorithm \code{propack.svd()} from the \code{svd} package is used.}
 }
 \value{
 A list with the following elements:

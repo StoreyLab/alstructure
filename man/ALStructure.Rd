@@ -13,9 +13,8 @@ alstructure(X, d_hat = NULL, svd_method = "base", tol = 1e-05,
 \item{d_hat}{Estimate of the latent space dimension \eqn{d}{d}. If left blank,
 this is estimated by the function \code{estimate_d()}}
 
-\item{svd_method}{One of "base" or ""truncated_svd"." If "vanilla" is chosen, the
-base \code{svd()} function is used. If "trunc" is used, the truncated svd algorithm
-from the \code{lfa} package is used.}
+\item{svd_method}{One of "base" or "truncated_svd." If "base" is chosen, the
+base \code{svd()} function is used. If "truncated_svd" is chosen, the truncated svd algorithm \code{propack.svd()} from the \code{svd} package is used.}
 
 \item{tol}{The convergence criterion. If \eqn{RMSE(\boldsymbol{\hat{Q}}_t - \boldsymbol{\hat{Q}}_{t + 1})
 < tol}{RMSE(Q_t - Q_(t + 1)) < tol}, then the algorithm halts}

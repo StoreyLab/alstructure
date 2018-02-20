@@ -30,8 +30,7 @@ alstructure_summary <- function(run_time, out_folder){
 #' @param d_hat Estimate of the latent space dimension \eqn{d}{d}. If left blank,
 #'        this is estimated by the function \code{estimate_d()}
 #' @param svd_method One of "base" or "truncated_svd." If "base" is chosen, the
-#' base \code{svd()} function is used. If "truncated_svd" is used, the truncated svd algorithm
-#' from the \code{lfa} package is used.
+#' base \code{svd()} function is used. If "truncated_svd" is chosen, the truncated svd algorithm \code{propack.svd()} from the \code{svd} package is used.
 #' @param tol The convergence criterion. If \eqn{RMSE(\boldsymbol{\hat{Q}}_t - \boldsymbol{\hat{Q}}_{t + 1})
 #'        < tol}{RMSE(Q_t - Q_(t + 1)) < tol}, then the algorithm halts
 #' @param max_iters The maximum number of iterations (repetitions of steps (6)

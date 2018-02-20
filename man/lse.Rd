@@ -14,8 +14,7 @@ function \code{d_estimate()}. When \eqn{d = n}{d = n}, all eigenvectors
 of \eqn{\boldsymbol{G}}{G} are returned.}
 
 \item{svd_method}{One of "base" or "truncated_svd." If "base" is chosen, the
-base \code{svd()} function is used. If "truncated_svd" is used, the truncated svd algorithm
-from the \code{lfa} package is used.}
+base \code{svd()} function is used. If "truncated_svd" is chosen, the truncated svd algorithm \code{propack.svd()} from the \code{svd} package is used.}
 }
 \value{
 A list with the following elements:
