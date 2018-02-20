@@ -13,7 +13,7 @@ alstructure(X, d_hat = NULL, svd_method = "base", tol = 1e-05,
 \item{d_hat}{Estimate of the latent space dimension \eqn{d}{d}. If left blank,
 this is estimated by the function \code{estimate_d()}}
 
-\item{svd_method}{One of "vanilla" or "trunc." If "vanilla" is chosen, the
+\item{svd_method}{One of "base" or ""truncated_svd"." If "vanilla" is chosen, the
 base \code{svd()} function is used. If "trunc" is used, the truncated svd algorithm
 from the \code{lfa} package is used.}
 

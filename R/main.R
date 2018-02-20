@@ -29,7 +29,7 @@ alstructure_summary <- function(run_time, out_folder){
 #' @param X The \eqn{m \times n}{m by n} SNP data matrix.
 #' @param d_hat Estimate of the latent space dimension \eqn{d}{d}. If left blank,
 #'        this is estimated by the function \code{estimate_d()}
-#' @param svd_method One of "vanilla" or "trunc." If "vanilla" is chosen, the
+#' @param svd_method One of "base" or ""truncated_svd"." If "vanilla" is chosen, the
 #' base \code{svd()} function is used. If "trunc" is used, the truncated svd algorithm
 #' from the \code{lfa} package is used.
 #' @param tol The convergence criterion. If \eqn{RMSE(\boldsymbol{\hat{Q}}_t - \boldsymbol{\hat{Q}}_{t + 1})
