@@ -74,14 +74,14 @@ alstructure <- function(X, d_hat = NULL,
                         Q_init){
 
   run_time <- proc.time()
+  
+  # impute missing values for X
+  X <- alstructure:::impute_mean(X)
 
   # if the there is no value for d, approximate d
   if (is.null(d_hat)){
     d_hat <- estimate_d(X)
   }
-
-  # impute missing values for X
-  X <- alstructure:::impute_mean(X)
 
   # estimate F_hat
   F_obj <- estimate_F(X, d = d_hat, svd_method = svd_method)
