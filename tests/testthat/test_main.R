@@ -18,3 +18,14 @@ test_that("the function alstructure is working properly with trunc.svd", {
   factors <- alstructure(X = X, tol = tol, max_iters = max_iters,
                          d_hat = d, svd_method = "truncated_svd")
 })
+
+test_that("the function alstructure is working properly with estimate_d", {
+  set.seed(12344)
+  m <- 1000; n <- 100; d <- 2; max_iters <- 1000; tol = 0.00001; alpha <- runif(d)
+  data <- simulate_admixture(m, n, d, alpha, seed = NA)
+  X <- data$X; Q <- data$Q
+  factors <- alstructure(X = X, tol = tol, max_iters = max_iters)
+
+  expect_equal(d, dim(factors$Q)[1])
+})
+

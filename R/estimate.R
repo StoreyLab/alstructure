@@ -92,13 +92,42 @@ estimate_F <- function(X, d, svd_method = "base"){
 #'
 #' @export
 estimate_d <- function(X){
+  # parameters
+  a_length <- 1000
+  plateau_thresh <- round(a_length / 30)
   m <- dim(X)[1]; n <- dim(X)[2]
-  cm <- n*m^(-1/3)
+  a <- seq(from = 1, to = n, length.out = a_length)
+  cm <- a * m^(-1/3)
+  d_hat_vec <- rep(0, a_length)
+
+  # compute eigenvectors
   D <- D_binomial(X)
   Wm <- 1 / m * t(X) %*% X - D
-  e <- eigen (Wm)
-  d_hat <- sum(e$values > cm)
-  d_hat
+  e <- eigen(Wm)
+
+  # compute d_hat for each value of a and look for a plateau
+  is_plateau <- FALSE
+  i <- 1
+  num_same <- 1
+  d_hat_old <- 0
+  while((num_same < plateau_thresh) & (i <= a_length)){
+    if(i == a_length){
+      warning("estimated d unreliable: no plateau found")
+    }
+    d_hat_new <- sum(e$values > cm[i])
+    if(d_hat_old == d_hat_new){
+      num_same <- num_same + 1
+    } else{
+      num_same <- 1
+    }
+    d_hat_old <- d_hat_new
+    i <- i + 1
+  }
+
+  if(d_hat_new == 1){
+    warning("d = 1 estimated: a minimum of d = 2 required")
+  }
+  d_hat <- max(d_hat_new, 2)
 }
 
 #' Estimates the latent subspace

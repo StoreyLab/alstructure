@@ -77,7 +77,7 @@ alstructure <- function(X, d_hat = NULL,
 
   # if the there is no value for d, approximate d
   if (is.null(d_hat)){
-    d_hat <- estimate_d(S, s = 2)
+    d_hat <- estimate_d(X)
   }
 
   # impute missing values for X

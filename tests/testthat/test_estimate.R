@@ -49,12 +49,12 @@ test_that("the function estimate_F() is working properly with truncated_svd meth
 
 test_that("the function estimate_d() is working properly", {
 
-  m <- 1000; n <- 200; d <- 2; alpha <- c(0.1, 0.1); size = 2; seed = 1234
+  m <- 1000; n <- 500; d <- 5; alpha <- rep(0.1, d); seed = 1234
   data <- simulate_admixture(m, n, d, alpha, seed = seed)
 
   d_hat <- estimate_d(data$X)
 
-  #expect_equal(k_hat, k)
+  expect_equal(d_hat, d)
 })
 
 test_that("the function lse() is working properly with truncated_svd method", {
