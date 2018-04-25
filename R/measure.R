@@ -39,3 +39,30 @@ mean_ABS <- function(A, B){
 RMSE <- function(A, B){
   RMSE <- sqrt(mean((A-B)^2))
 }
+
+#' Compute the binomial likelihood of the SNP matrix given individual-specific
+#' allele frequencies.
+#'
+#' Compute the binomial likelihood of the data \eqn{\boldsymbol{X}}{X} given the
+#' parameters \eqn{\boldsymbol{F}}{F}. The likelihood
+#' is the probability of the data given the parameters, which under the admixture
+#' model is:
+#' \deqn{\prod_{ij} \binom{2}{x_{ij}} f_{ij}^{x_{ij}} (1 - f_{ij})^{2 - x_{ij}}}
+#'
+#' @param X The \eqn{m \times n}{m x n} SNP data matrix
+#' @param F The \eqn{m \times n}{m x n} matrix of binomial parameters.
+#'
+#' @return The likelihood and log likelihood of the data given the parameters
+#'
+#' @keywords internal
+binomial_likelihood <- function(X, F){
+
+  L_vec <- dbinom(c(X), 2, c(F))
+  L <- prod(L_vec)
+  l <- sum(log(L_vec))
+  vals <- list(L = L, l = l)
+}
+
+
+
+

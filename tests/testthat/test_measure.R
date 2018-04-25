@@ -19,3 +19,11 @@ test_that("the function RMSE() is working properly",{
 
   expect_equal(RMSE_compute, RMSE_true)
 })
+
+test_that("the function binomial_likelihood() is working properly",{
+  X <- matrix(c(0,0,0,0), nrow = 2, ncol = 2)
+  F <- matrix(c(0.5,0.5,0.5,0.5), nrow = 2, ncol = 2)
+  likelihood <- binomial_likelihood(X, F)
+
+  expect_equal(likelihood$L, .25^4)
+})
