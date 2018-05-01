@@ -91,6 +91,7 @@ impute_mean <- function(X){
 #'
 #' @export
 factor_F <- function(F_hat, d, tol = 0.00001, max_iters = 1000){
+  epsilon <- 10^(-10)
   m <- dim(F_hat)[1]
   n <- dim(F_hat)[2]
   P_hat <- matrix(runif(m * d, min = 0, max = 1), nrow = m, ncol = d)
@@ -108,7 +109,7 @@ factor_F <- function(F_hat, d, tol = 0.00001, max_iters = 1000){
       Q_hat[,j] <- projsplx(Q_hat[,j])
     }
     P_hat <- t(solve(Q_hat%*%t(Q_hat), Q_hat%*%t(F_hat)))
-    P_hat[P_hat > 1] <- 1; P_hat[P_hat < 0] <- 0;
+    P_hat[P_hat >= 1] <- (1 - epsilon); P_hat[P_hat <= 0] <- epsilon;
     iter <- iter + 1
     current_RMSE <- RMSE(Q_hat, Q_hat_old)
     Q_hat_old <- Q_hat
