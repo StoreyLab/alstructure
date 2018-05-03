@@ -57,9 +57,13 @@ make_bed <- function(X, out_file, B = min(ceiling(dim(X)[2]/10))){
 
     # no missing data
     intsnp <- matrix(intsnp, 4)
-    intsnp <- apply(intsnp, 2, function(x) { #x is vector of 4 ints
-      x[1] + 4 * x[2] + 16 * x[3] + 64 * x[4]
-    })
+    # intsnp <- apply(intsnp, 2, function(x) { #x is vector of 4 ints
+    #   x[1] + 4 * x[2] + 16 * x[3] + 64 * x[4]
+    # })
+    intsnp[2,] <- intsnp[2,] * 4
+    intsnp[3,] <- intsnp[3,] * 16
+    intsnp[4,] <- intsnp[4,] * 64
+    intsnp <- colSums(intsnp)
     writeBin(as.raw(intsnp), f)
   }
 
