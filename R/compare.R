@@ -23,7 +23,6 @@ make_bed <- function(X, out_file, B = min(ceiling(dim(X)[2]/10))){
 
   m <- nrow(X)
   n <- ncol(X)
-  splits <- split(1:n, ceiling(seq_along(1:n)/B))
 
   # number of zeros needed to append in order for n to be divisible by 4
   n_diff <- 4 - (n %% 4)
@@ -37,9 +36,9 @@ make_bed <- function(X, out_file, B = min(ceiling(dim(X)[2]/10))){
   # required for PLINK formatting
   writeBin(as.raw(c(108, 27, 1)), f)
 
-  # breaks SNP matrix into chunks to write binary file
-  for(i in 1:B){
-    set.seed(i)
+  # breaks SNP matrix into chunks of size B to write binary file
+  splits <- split(1:m, ceiling(seq_along(1:m)/B))
+  for(i in 1:length(names(splits))){
 
     # look at ith B-block of rows
     x <- X[splits[[i]], ]
