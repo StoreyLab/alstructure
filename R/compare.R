@@ -25,7 +25,7 @@ make_bed <- function(X, out_file, B = min(ceiling(dim(X)[2]/10))){
   n <- ncol(X)
 
   # number of zeros needed to append in order for n to be divisible by 4
-  n_diff <- 4 - (n %% 4)
+  n_diff <- (4 - (n %% 4)) %% 4
   buff_mat <- matrix(0, nrow = m, ncol = n_diff)
   X <- cbind(X, buff_mat)
 
