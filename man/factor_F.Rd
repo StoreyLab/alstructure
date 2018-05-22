@@ -4,7 +4,7 @@
 \alias{factor_F}
 \title{A fast algorithm for factoring \eqn{\boldsymbol{\hat{F}}}{F_hat}.}
 \usage{
-factor_F(F_hat, d, tol = 1e-05, max_iters = 1000)
+factor_F(F_hat, d, tol = 0.00001, max_iters = 1000)
 }
 \arguments{
 \item{F_hat}{The estimate of the matrix \eqn{\boldsymbol{F}}{F} to be factored}

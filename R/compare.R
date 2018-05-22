@@ -27,7 +27,19 @@ make_bed <- function(X, out_file, B = min(ceiling(dim(X)[2]/10))){
   # number of zeros needed to append in order for n to be divisible by 4
   n_diff <- (4 - (n %% 4)) %% 4
   buff_mat <- matrix(0, nrow = m, ncol = n_diff)
-  X <- cbind(X, buff_mat)
+
+  # split into three pieces, then combine together to avoid
+  # cbind error
+  X1 <- X[1:floor(m / 3), ]
+  X2 <- X[(floor(m / 3) + 1):(floor(2 * m / 3)), ]
+  X3 <- X[(floor(2 * m / 3) + 1):m, ]
+  buff_mat1 <- buff_mat[1:floor(m / 3), ]
+  buff_mat2 <- buff_mat[(floor(m / 3) + 1):(floor(2 * m / 3)), ]
+  buff_mat3 <- buff_mat[(floor(2 * m / 3) + 1):m, ]
+  X1 <- cbind(X1, buff_mat1)
+  X2 <- cbind(X2, buff_mat2)
+  X3 <- cbind(X3, buff_mat3)
+  X <- rbind(X1, X2, X3)
 
   f <- file(sprintf("%s.bed", out_file), open = "wb")
   close(f)

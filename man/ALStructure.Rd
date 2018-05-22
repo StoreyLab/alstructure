@@ -4,7 +4,7 @@
 \alias{alstructure}
 \title{Main function for execution of the \code{ALStructure} algorithm}
 \usage{
-alstructure(X, d_hat = NULL, svd_method = "base", tol = 1e-05,
+alstructure(X, d_hat = NULL, svd_method = "base", tol = 0.00001,
   max_iters = 1000, order_method = "ave_admixture", P_init, Q_init)
 }
 \arguments{

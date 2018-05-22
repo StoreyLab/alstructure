@@ -4,7 +4,7 @@
 \alias{cals}
 \title{A provable algorithm for factoring \eqn{\boldsymbol{\hat{F}}}{F_hat}.}
 \usage{
-cals(F_hat, d, tol = 1e-05, max_iters = 1000, P_init = NULL,
+cals(F_hat, d, tol = 0.00001, max_iters = 1000, P_init = NULL,
   Q_init = NULL, P_samples = NULL, Q_samples = NULL)
 }
 \arguments{
