@@ -57,7 +57,9 @@ RMSE <- function(A, B){
 #' @keywords internal
 binomial_likelihood <- function(X, F){
 
-  L_vec <- dbinom(c(X), 2, c(F))
+  X_vec <- c(X)[-which(is.na(c(X)))]
+  F_vec <- c(F)[-which(is.na(c(X)))]
+  L_vec <- dbinom(X_vec, 2, F_vec)
   L <- prod(L_vec)
   l <- sum(log(L_vec))
   vals <- list(L = L, l = l)
