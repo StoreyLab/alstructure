@@ -21,8 +21,8 @@ test_that("the function RMSE() is working properly",{
 })
 
 test_that("the function binomial_likelihood() is working properly",{
-  X <- matrix(c(0,0,0,0,NA,NA), nrow = 2, ncol = 3)
-  F <- matrix(c(0.5,0.5,0.5,0.5, 1, 1), nrow = 2, ncol = 3)
+  X <- matrix(c(0,0,0,0,NA,NA), nrow = 3, ncol = 2)
+  F <- matrix(c(0.5,0.5,0.5,0.5, 1, 1), nrow = 3, ncol = 2)
   likelihood <- binomial_likelihood(X, F)
 
   expect_equal(likelihood$L, .25^4)

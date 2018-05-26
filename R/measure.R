@@ -56,12 +56,27 @@ RMSE <- function(A, B){
 #'
 #' @keywords internal
 binomial_likelihood <- function(X, F){
+  m <- dim(X)[1]
 
-  X_vec <- c(X)[-which(is.na(c(X)))]
-  F_vec <- c(F)[-which(is.na(c(X)))]
-  L_vec <- dbinom(X_vec, 2, F_vec)
-  L <- prod(L_vec)
-  l <- sum(log(L_vec))
+  X1 <- X[1:floor(m / 3), ]
+  X2 <- X[(floor(m / 3) + 1):(floor(2 * m / 3)), ]
+  X3 <- X[(floor(2 * m / 3) + 1):m, ]
+  X1_vec <- c(X1[!is.na(X1)])
+  X2_vec <- c(X2[!is.na(X2)])
+  X3_vec <- c(X3[!is.na(X3)])
+
+  F1 <- c(F[1:floor(m / 3), ])
+  F2 <- c(F[(floor(m / 3) + 1):(floor(2 * m / 3)), ])
+  F3 <- c(F[(floor(2 * m / 3) + 1):m, ])
+  F1_vec <- c(F1[!is.na(X1)])
+  F2_vec <- c(F2[!is.na(X2)])
+  F3_vec <- c(F3[!is.na(X3)])
+
+  L1 <- dbinom(X1_vec, 2, F1_vec)
+  L2 <- dbinom(X2_vec, 2, F2_vec)
+  L3 <- dbinom(X3_vec, 2, F3_vec)
+  L <- prod(L1) * prod(L2) * prod(L3)
+  l <- sum(log(L1)) + sum(log(L2)) + sum(log(L3))
   vals <- list(L = L, l = l)
 }
 
